@@ -7,13 +7,13 @@ use chrono::{DateTime, Local, Utc};
 use comfy_table::Table;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use status::Status;
 use std::{
-    fs::{File, OpenOptions},
-    io::{Result, Seek, SeekFrom},
+    fs::OpenOptions,
+    io::{self, Result, SeekFrom},
     path::PathBuf,
 };
 use uuid::Uuid;
-use status::Status;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Task {
@@ -34,14 +34,17 @@ impl Task {
     }
 }
 
-fn collect(mut file: &File) -> Result<Vec<Task>> {
-    let tasks: Vec<Task> = match serde_json::from_reader(file) {
+fn collect<T>(mut buf: T) -> Result<Vec<Task>>
+where
+    T: io::Seek + io::Read,
+{
+    let tasks: Vec<Task> = match serde_json::from_reader(&mut buf) {
         Ok(tasks) => tasks,
         Err(e) if e.is_eof() => Vec::new(),
         Err(e) => Err(e)?,
     };
 
-    file.seek(SeekFrom::Start(0))?;
+    buf.seek(SeekFrom::Start(0))?;
 
     Ok(tasks)
 }
@@ -112,4 +115,3 @@ pub fn list(path: PathBuf) -> Result<()> {
 
     Ok(())
 }
-
