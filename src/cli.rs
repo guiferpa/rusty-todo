@@ -24,5 +24,5 @@ pub struct Opt {
     pub action: Action,
 
     #[structopt(parse(from_os_str))]
-    pub file: Option<PathBuf>,
+    pub pathbuf: PathBuf,
 }
