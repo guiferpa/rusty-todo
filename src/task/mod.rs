@@ -49,18 +49,18 @@ where
     Ok(tasks)
 }
 
-pub fn add(path: PathBuf, task: Task) -> Result<()> {
-    let file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(path)?;
+pub fn add<T>(mut buf: T, task: Task) -> Result<()>
+where
+    T: io::Seek + io::Read + io::Write,
+{
 
-    let mut tasks = collect(&file)?;
+    let mut tasks = collect(&mut buf)?;
 
     tasks.push(task);
 
-    serde_json::to_writer(file, &tasks)?;
+    serde_json::to_writer(&mut buf, &tasks)?;
+
+    buf.seek(SeekFrom::Start(0))?;
 
     Ok(())
 }

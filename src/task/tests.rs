@@ -1,8 +1,8 @@
-use std::io::Cursor;
 use chrono::Utc;
+use std::io::Cursor;
 use uuid::Uuid;
 
-use super::{collect, status::Status, Task};
+use super::{collect, add, status::Status, Task};
 
 #[test]
 fn test_list_tasks_with_empty_buffer() {
@@ -54,4 +54,20 @@ fn test_list_tasks_with_many_in_buffer() {
     let mut buf = Cursor::new(raw);
     let got = collect(&mut buf).unwrap();
     assert_eq!(got.len(), 3);
+}
+
+#[test]
+fn test_add_task() {
+    let mut buf = Cursor::new(Vec::new());
+    let id = Uuid::new_v4().to_string();
+    let task = Task {
+        id: id.clone(),
+        text: "".to_string(),
+        status: Status::Pending,
+        created_at: Utc::now(),
+    };
+    add(&mut buf, task).unwrap();
+    let got: Vec<Task> = serde_json::from_reader(buf).unwrap();
+    assert_eq!(got.len(), 1);
+    assert_eq!(got[0].id, id);
 }
