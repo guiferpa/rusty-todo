@@ -1,5 +1,8 @@
 pub mod status;
 
+#[cfg(test)]
+mod tests;
+
 use chrono::{DateTime, Local, Utc};
 use comfy_table::Table;
 use serde::{Deserialize, Serialize};
