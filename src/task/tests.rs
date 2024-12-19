@@ -1,7 +1,7 @@
+use super::{add, buffer::mock::MockBuffer, status::Status, Task};
+use crate::task::{buffer::mock::MockCaller, complete, list};
 use chrono::Utc;
 use uuid::Uuid;
-use crate::task::{buffer::mock::MockCaller, complete, list};
-use super::{add, buffer::mock::MockBuffer, status::Status, Task};
 
 #[test]
 fn test_new_task() {

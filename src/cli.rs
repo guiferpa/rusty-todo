@@ -11,14 +11,11 @@ pub enum Action {
     Done {
         #[structopt()]
         task_id: String,
-    }
+    },
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(
-    name = "Todo",
-    about = "A command line to-do app written in Rust"
-)]
+#[structopt(name = "Todo", about = "A command line to-do app written in Rust")]
 pub struct Opt {
     #[structopt(subcommand)]
     pub action: Action,

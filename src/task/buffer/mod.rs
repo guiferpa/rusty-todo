@@ -12,4 +12,3 @@ impl SetLen for File {
         File::set_len(&self, size)
     }
 }
-
