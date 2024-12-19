@@ -1,22 +1,12 @@
 use chrono::Utc;
 use uuid::Uuid;
 use crate::task::{buffer::mock::MockCaller, complete, list};
-use super::{add, buffer::mock::MockBuffer, collect, status::Status, Task};
+use super::{add, buffer::mock::MockBuffer, status::Status, Task};
 
 #[test]
 fn test_new_task() {
     let task = Task::new(String::new());
     assert!(matches!(task.status, Status::Pending));
-}
-
-#[test]
-fn test_collect_tasks() {
-    let mut buf = MockBuffer::new();
-    collect(&mut buf).unwrap();
-    assert_eq!(buf.call_times(MockCaller::Read), 1);
-    assert_eq!(buf.call_times(MockCaller::Write), 0);
-    assert_eq!(buf.call_times(MockCaller::Seek), 1);
-    assert_eq!(buf.call_times(MockCaller::SetLen), 0);
 }
 
 #[test]

@@ -31,7 +31,26 @@ impl Task {
     }
 }
 
-fn collect<T>(mut buf: T) -> Result<Vec<Task>>
+pub fn render(tasks: Vec<Task>) -> () {
+    if tasks.is_empty() {
+        println!("Task list is empty!");
+    } else {
+        let mut table = Table::new();
+        let body = table.set_header(vec!["Id", "Task", "Status", "Created at"]);
+        for task in tasks {
+            let status: String = task.status.to_string();
+            let created_at: String = task
+                .created_at
+                .with_timezone(&Local)
+                .format("%F %H:%M")
+                .to_string();
+            body.add_row(vec![task.id, task.text, status, created_at]);
+        }
+        println!("{table}");
+    }
+}
+
+pub fn list<T>(mut buf: T) -> Result<Vec<Task>>
 where
     T: io::Seek + io::Read,
 {
@@ -50,7 +69,7 @@ pub fn add<T>(mut buf: &mut T, task: Task) -> Result<()>
 where
     T: io::Seek + io::Read + io::Write,
 {
-    let mut tasks = collect(&mut buf)?;
+    let mut tasks = list(&mut buf)?;
 
     tasks.push(task);
 
@@ -65,7 +84,7 @@ pub fn complete<T>(buf: &mut T, task_id: String) -> Result<()>
 where
     T: io::Seek + io::Read + io::Write + buffer::SetLen,
 {
-    let mut tasks = collect(&mut *buf)?;
+    let mut tasks = list(&mut *buf)?;
 
     buf.set_len(0)?;
 
@@ -80,32 +99,6 @@ where
         .collect();
 
     serde_json::to_writer(buf, &new_tasks)?;
-
-    Ok(())
-}
-
-pub fn list<T>(buf: &mut T) -> Result<()>
-where
-    T: io::Read + io::Seek,
-{
-    let tasks = collect(&mut *buf)?;
-
-    if tasks.is_empty() {
-        println!("Task list is empty!");
-    } else {
-        let mut table = Table::new();
-        let body = table.set_header(vec!["Id", "Task", "Status", "Created at"]);
-        for task in tasks {
-            let status: String = task.status.to_string();
-            let created_at: String = task
-                .created_at
-                .with_timezone(&Local)
-                .format("%F %H:%M")
-                .to_string();
-            body.add_row(vec![task.id, task.text, status, created_at]);
-        }
-        println!("{table}");
-    }
 
     Ok(())
 }

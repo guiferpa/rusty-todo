@@ -17,7 +17,10 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     match file {
         Ok(mut file) => match opt.action {
             Action::Add { task } => task::add(&mut file, Task::new(task)),
-            Action::List => task::list(&mut file),
+            Action::List => {
+                let tasks = task::list(&mut file)?;
+                Ok(task::render(tasks))
+            }
             Action::Done { task_id } => task::complete(&mut file, task_id),
         },
         Err(error) => Err(error),
