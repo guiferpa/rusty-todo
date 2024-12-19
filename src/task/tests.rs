@@ -4,6 +4,12 @@ use crate::task::{buffer::mock::MockCaller, complete, list};
 use super::{add, buffer::mock::MockBuffer, collect, status::Status, Task};
 
 #[test]
+fn test_new_task() {
+    let task = Task::new(String::new());
+    assert!(matches!(task.status, Status::Pending));
+}
+
+#[test]
 fn test_collect_tasks() {
     let mut buf = MockBuffer::new();
     collect(&mut buf).unwrap();
