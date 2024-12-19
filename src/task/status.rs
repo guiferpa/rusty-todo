@@ -1,7 +1,7 @@
-use std::fmt;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum Status {
     Pending,
     Done,

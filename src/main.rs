@@ -15,10 +15,10 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         .open(opt.pathbuf.clone());
 
     match file {
-        Ok(file) => match opt.action {
-            Action::Add { task } => task::add(file, Task::new(task)),
-            Action::List => task::list(opt.pathbuf),
-            Action::Done { task_id } => task::complete(opt.pathbuf, task_id),
+        Ok(mut file) => match opt.action {
+            Action::Add { task } => task::add(&mut file, Task::new(task)),
+            Action::List => task::list(&mut file),
+            Action::Done { task_id } => task::complete(&mut file, task_id),
         },
         Err(error) => Err(error),
     }?;

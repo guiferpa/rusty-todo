@@ -1,3 +1,4 @@
+mod buffer;
 pub mod status;
 
 #[cfg(test)]
@@ -8,14 +9,10 @@ use comfy_table::Table;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use status::Status;
-use std::{
-    fs::OpenOptions,
-    io::{self, Result, SeekFrom},
-    path::PathBuf,
-};
+use std::io::{self, Result, SeekFrom};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Task {
     pub id: String,
     pub text: String,
@@ -49,11 +46,10 @@ where
     Ok(tasks)
 }
 
-pub fn add<T>(mut buf: T, task: Task) -> Result<()>
+pub fn add<T>(mut buf: &mut T, task: Task) -> Result<()>
 where
     T: io::Seek + io::Read + io::Write,
 {
-
     let mut tasks = collect(&mut buf)?;
 
     tasks.push(task);
@@ -65,16 +61,13 @@ where
     Ok(())
 }
 
-pub fn complete(path: PathBuf, task_id: String) -> Result<()> {
-    let file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(path)?;
+pub fn complete<T>(buf: &mut T, task_id: String) -> Result<()>
+where
+    T: io::Seek + io::Read + io::Write + buffer::SetLen,
+{
+    let mut tasks = collect(&mut *buf)?;
 
-    let mut tasks = collect(&file)?;
-
-    file.set_len(0)?;
+    buf.set_len(0)?;
 
     let new_tasks: Vec<&mut Task> = tasks
         .iter_mut()
@@ -86,15 +79,16 @@ pub fn complete(path: PathBuf, task_id: String) -> Result<()> {
         })
         .collect();
 
-    serde_json::to_writer(file, &new_tasks)?;
+    serde_json::to_writer(buf, &new_tasks)?;
 
     Ok(())
 }
 
-pub fn list(path: PathBuf) -> Result<()> {
-    let file = OpenOptions::new().read(true).open(path)?;
-
-    let tasks = collect(&file)?;
+pub fn list<T>(buf: &mut T) -> Result<()>
+where
+    T: io::Read + io::Seek,
+{
+    let tasks = collect(&mut *buf)?;
 
     if tasks.is_empty() {
         println!("Task list is empty!");
