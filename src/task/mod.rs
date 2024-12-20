@@ -80,11 +80,11 @@ where
     Ok(())
 }
 
-pub fn complete<T>(buf: &mut T, task_id: String) -> Result<()>
+pub fn complete<T>(mut buf: &mut T, task_id: String) -> Result<()>
 where
     T: io::Seek + io::Read + io::Write + buffer::SetLen,
 {
-    let mut tasks = list(&mut *buf)?;
+    let mut tasks = list(&mut buf)?;
 
     buf.set_len(0)?;
 
@@ -98,7 +98,9 @@ where
         })
         .collect();
 
-    serde_json::to_writer(buf, &new_tasks)?;
+    serde_json::to_writer(&mut buf, &new_tasks)?;
+
+    buf.seek(SeekFrom::Start(0))?;
 
     Ok(())
 }

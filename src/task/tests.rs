@@ -41,6 +41,6 @@ fn test_complete_task() {
     complete(&mut buf, Uuid::new_v4().to_string()).unwrap();
     assert_eq!(buf.call_times(MockCaller::Read), 1);
     assert_eq!(buf.call_times(MockCaller::Write), 0);
-    assert_eq!(buf.call_times(MockCaller::Seek), 1);
+    assert_eq!(buf.call_times(MockCaller::Seek), 2);
     assert_eq!(buf.call_times(MockCaller::SetLen), 1);
 }
